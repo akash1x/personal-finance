@@ -11,16 +11,20 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthRegisterDto, AuthLoginDto } from './dto/request.dto';
-import { AuthGuard } from './auth.guard';
+import { Public } from './custom_decorators/public.decorator';
 
 @Controller('auth')
 export class AuthController {
   constructor(@Inject(AuthService) private authService: AuthService) {}
 
+  @Public()
+  @HttpCode(HttpStatus.OK)
   @Post('register')
   register(@Body() registerDto: AuthRegisterDto) {
     return this.authService.register(registerDto);
   }
+
+  @Public()
   @HttpCode(HttpStatus.OK)
   @Post('login')
   login(@Body() loginDto: AuthLoginDto) {
@@ -29,7 +33,6 @@ export class AuthController {
 
   @Get('profile')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard)
   getProfile(@Request() req) {
     return this.authService.getProfile(req.user.sub);
   }
