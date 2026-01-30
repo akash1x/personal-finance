@@ -5,6 +5,9 @@ import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { UsersModule } from './users/users.module';
+import { BudgetModule } from './budget/budget.module';
+import { AccountModule } from './account/account.module';
+import { TransactionModule } from './transaction/transaction.module';
 
 @Module({
   imports: [
@@ -20,6 +23,9 @@ import { UsersModule } from './users/users.module';
       synchronize: true,
     }),
     UsersModule,
+    BudgetModule,
+    AccountModule,
+    TransactionModule,
   ],
   controllers: [AppController],
   providers: [AppService],

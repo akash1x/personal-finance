@@ -4,10 +4,23 @@
     "name": "Personal Finance API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
   "item": [
     {
       "name": "Health Check",
       "request": {
+        "auth": {
+          "type": "noauth"
+        },
         "method": "GET",
         "header": [],
         "url": {
@@ -26,6 +39,9 @@
         {
           "name": "Register",
           "request": {
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
             "header": [
               {
@@ -50,7 +66,22 @@
         },
         {
           "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set(\"access_token\", jsonData.token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
             "header": [
               {
@@ -72,8 +103,164 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/auth/profile",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["auth", "profile"]
+            }
+          },
+          "response": []
         }
       ]
+    },
+    {
+      "name": "Budget",
+      "item": [
+        {
+          "name": "Create Budget",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Monthly Budget\",\n  \"amount\": 1000,\n  \"currency\": \"usd\",\n  \"month\": \"january\",\n  \"year\": 2024,\n  \"userId\": \"uuid-goes-here\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/budget",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["budget"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Budget",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/budget",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["budget"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Account",
+      "item": [
+        {
+          "name": "Create Account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Main Bank Account\",\n  \"type\": \"bank\",\n  \"balance\": 5000,\n  \"userId\": \"uuid-goes-here\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/account",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["account"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Accounts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/account",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["account"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Transaction",
+      "item": [
+        {
+          "name": "Create Transaction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Grocery\",\n  \"amount\": 50,\n  \"type\": \"expense\",\n  \"accountId\": \"uuid-of-account\",\n  \"category\": \"food\",\n  \"date\": \"2024-01-30T10:00:00.000Z\",\n  \"currency\": \"usd\",\n  \"status\": \"completed\",\n  \"recurrencePattern\": \"monthly\",\n  \"isRecurring\": false\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/transaction",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["transaction"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Transactions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/transaction",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["transaction"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "access_token",
+      "value": ""
     }
   ]
 }
