@@ -11,15 +11,22 @@ export class TransactionRepository {
     private repository: Repository<Transaction>,
   ) {}
 
-  async createOne(createTransactionDto: CreateTransactionDto) {
+  async createOne(userId: string, createTransactionDto: CreateTransactionDto) {
     const { accountId, ...transactionData } = createTransactionDto;
     return this.repository.save({
       ...transactionData,
       account: { id: accountId },
+      user: { id: userId },
     });
   }
 
-  async find() {
-    return this.repository.find();
+  async findAllByUserId(userId: string) {
+    return this.repository.find({ where: { user: { id: userId } } });
+  }
+
+  async findAllByAccountId(accountId: string) {
+    return this.repository.find({
+      where: { account: { id: accountId } },
+    });
   }
 }

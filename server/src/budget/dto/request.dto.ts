@@ -6,5 +6,4 @@ export class CreateBudgetDto {
   currency: Currency;
   month: Month;
   year: number;
-  userId: string;
 }

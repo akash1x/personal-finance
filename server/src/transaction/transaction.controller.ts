@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Inject, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Param,
+  Post,
+  Req,
+} from '@nestjs/common';
 import { TransactionService } from './transaction.service';
 import { CreateTransactionDto } from './dto/request.dto';
 
@@ -9,12 +17,28 @@ export class TransactionController {
   ) {}
 
   @Post()
-  async createTransaction(@Body() createTransactionDto: CreateTransactionDto) {
-    return this.transactionService.createTransaction(createTransactionDto);
+  async createTransaction(
+    @Req() req,
+    @Body() createTransactionDto: CreateTransactionDto,
+  ) {
+    return this.transactionService.createTransaction(
+      req.user.sub,
+      createTransactionDto,
+    );
   }
 
-  @Get()
-  async getTransaction() {
-    return this.transactionService.getTransaction();
+  @Get('user')
+  async getAllTransactionsByUserId(@Req() req) {
+    return this.transactionService.getAllTransactionsByUserId(req.user.sub);
+  }
+  @Get('account/:accountId')
+  async getAllTransactionsByAccountId(
+    @Req() req,
+    @Param('accountId') accountId: string,
+  ) {
+    return this.transactionService.getAllTransactionsByAccountId(
+      req.user.sub,
+      accountId,
+    );
   }
 }

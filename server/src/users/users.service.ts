@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { User } from 'src/entities/user.entity';
 import { UserRepository } from 'src/respositories/user.repository';
 import * as bcrypt from 'bcrypt';
@@ -23,5 +23,12 @@ export class UsersService {
 
   async findUserById(id: string) {
     return this.userRepository.findOneBy({ id });
+  }
+
+  async userExists(userId: string) {
+    const user = await this.findUserById(userId);
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
   }
 }

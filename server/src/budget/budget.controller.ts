@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Inject, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Post,
+  Query,
+  Req,
+} from '@nestjs/common';
 import { BudgetService } from './budget.service';
 import { CreateBudgetDto } from './dto/request.dto';
 import { Month } from 'src/utils/enums';
@@ -10,12 +18,16 @@ export class BudgetController {
   ) {}
 
   @Post()
-  create(@Body() createBudgetDto: CreateBudgetDto) {
-    return this.budgetService.create(createBudgetDto);
+  create(@Req() req, @Body() createBudgetDto: CreateBudgetDto) {
+    return this.budgetService.create(req.user.sub, createBudgetDto);
   }
 
   @Get()
-  getCurrentBudget(@Query() query: { month: Month; year: number }) {
-    return this.budgetService.getCurrentBudget(query.month, query.year);
+  getCurrentBudget(@Req() req, @Query() query: { month: Month; year: number }) {
+    return this.budgetService.getCurrentBudget(
+      req.user.sub,
+      query.month,
+      query.year,
+    );
   }
 }

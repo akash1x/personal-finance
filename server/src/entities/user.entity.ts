@@ -9,11 +9,12 @@ import {
 } from 'typeorm';
 import { Budget } from './budget.entity';
 import { Account } from './account.entity';
+import { Transaction } from './transaction.entity';
 
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   firstName: string;
@@ -41,4 +42,7 @@ export class User {
 
   @OneToMany(() => Account, (account) => account.user)
   accounts: Account[];
+
+  @OneToMany(() => Transaction, (transaction) => transaction.user)
+  transactions: Transaction[];
 }

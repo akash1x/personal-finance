@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Post } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Post, Req } from '@nestjs/common';
 import { AccountService } from './account.service';
 import { CreateAccountDto } from './dto/request.dto';
 
@@ -9,12 +9,12 @@ export class AccountController {
   ) {}
 
   @Post()
-  async createAccount(@Body() createAccountDto: CreateAccountDto) {
-    return this.accountService.createAccount(createAccountDto);
+  async createAccount(@Req() req, @Body() createAccountDto: CreateAccountDto) {
+    return this.accountService.createAccount(req.user.sub, createAccountDto);
   }
 
   @Get()
-  async getAccount() {
-    return this.accountService.getAccount();
+  async getAccount(@Req() req) {
+    return this.accountService.getAccount(req.user.sub);
   }
 }

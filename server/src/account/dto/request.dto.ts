@@ -4,5 +4,4 @@ export class CreateAccountDto {
   name: string;
   type: AccountType;
   balance: number;
-  userId: string;
 }

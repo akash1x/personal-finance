@@ -11,11 +11,14 @@ export class AccountRepository {
     private readonly repository: Repository<Account>,
   ) {}
 
-  async createAccount(createAccountDto: CreateAccountDto) {
-    return this.repository.save(createAccountDto);
+  async createAccount(userId: string, createAccountDto: CreateAccountDto) {
+    return this.repository.save({
+      ...createAccountDto,
+      user: { id: userId },
+    });
   }
 
-  async getAccount() {
-    return this.repository.find();
+  async getAccount(userId: string) {
+    return this.repository.find({ where: { user: { id: userId } } });
   }
 }

@@ -14,6 +14,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Account } from './account.entity';
+import { User } from './user.entity';
 
 @Entity()
 export class Transaction {
@@ -55,4 +56,7 @@ export class Transaction {
 
   @ManyToOne(() => Account, (account) => account.transactions)
   account: Account;
+
+  @ManyToOne(() => User, (user) => user.transactions)
+  user: User;
 }
