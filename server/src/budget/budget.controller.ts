@@ -4,6 +4,7 @@ import {
   Get,
   Inject,
   Post,
+  Put,
   Query,
   Req,
 } from '@nestjs/common';
@@ -23,11 +24,19 @@ export class BudgetController {
   }
 
   @Get()
-  getCurrentBudget(@Req() req, @Query() query: { month: Month; year: number }) {
-    return this.budgetService.getCurrentBudget(
+  getCurrentBudgetStatus(
+    @Req() req,
+    @Query() query: { month: Month; year: number },
+  ) {
+    return this.budgetService.getCurrentBudgetStatus(
       req.user.sub,
       query.month,
       query.year,
     );
+  }
+
+  @Put()
+  updateBudget(@Req() req, @Body() budget: CreateBudgetDto) {
+    return this.budgetService.updateBudget(req.user.sub, budget);
   }
 }

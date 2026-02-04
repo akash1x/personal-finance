@@ -24,11 +24,7 @@ export class DashboardService {
     if (accounts.length === 0) {
       throw new HttpException('Accounts not found', HttpStatus.NOT_FOUND);
     }
-    const budget = await this.budgetRepository.findCurrentBudget(
-      userId,
-      month,
-      year,
-    );
+    const budget = await this.budgetRepository.findBudget(userId);
     if (!budget) {
       throw new HttpException('Budget not found', HttpStatus.NOT_FOUND);
     }

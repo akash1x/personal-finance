@@ -3,7 +3,6 @@ import { Budget } from 'src/entities/budget.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateBudgetDto } from 'src/budget/dto/request.dto';
-import { Month } from 'src/utils/enums';
 
 @Injectable()
 export class BudgetRepository {
@@ -19,11 +18,19 @@ export class BudgetRepository {
     });
   }
 
-  public findCurrentBudget(userId: string, month: Month, year: number) {
+  public findBudget(userId: string) {
     return this.repository.findOneBy({
       user: { id: userId },
-      month,
-      year,
+    });
+  }
+
+  public async upsertBudget(userId: string, budget: CreateBudgetDto) {
+    const existingBudget = await this.findBudget(userId);
+
+    return this.repository.save({
+      ...existingBudget,
+      ...budget,
+      user: { id: userId },
     });
   }
 }

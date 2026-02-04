@@ -18,13 +18,9 @@ export class BudgetService {
     return this.budgetRepository.saveBudget(userId, createBudgetDto);
   }
 
-  async getCurrentBudget(userId: string, month: Month, year: number) {
+  async getCurrentBudgetStatus(userId: string, month: Month, year: number) {
     await this.usersService.userExists(userId);
-    const budget = await this.budgetRepository.findCurrentBudget(
-      userId,
-      month,
-      year,
-    );
+    const budget = await this.budgetRepository.findBudget(userId);
     if (!budget) {
       throw new HttpException('Budget not found', HttpStatus.NOT_FOUND);
     }
@@ -62,5 +58,10 @@ export class BudgetService {
       remainingBudget,
       expenseByCategory,
     };
+  }
+
+  async updateBudget(userId: string, budget: CreateBudgetDto) {
+    await this.usersService.userExists(userId);
+    return this.budgetRepository.upsertBudget(userId, budget);
   }
 }

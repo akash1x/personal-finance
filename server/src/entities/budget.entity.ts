@@ -16,9 +16,6 @@ export class Budget {
   id: string;
 
   @Column()
-  name: string;
-
-  @Column()
   amount: number;
 
   @Column({
@@ -26,15 +23,6 @@ export class Budget {
     enum: Currency,
   })
   currency: Currency;
-
-  @Column({
-    type: 'enum',
-    enum: Month,
-  })
-  month: Month;
-
-  @Column()
-  year: number;
 
   @CreateDateColumn()
   createdAt: Date;
