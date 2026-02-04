@@ -45,4 +45,8 @@ export class User {
 
   @OneToMany(() => Transaction, (transaction) => transaction.user)
   transactions: Transaction[];
+
+  accountsCount?: number;
+  transactionsCount?: number;
+  budgetCount?: number;
 }

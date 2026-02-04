@@ -22,7 +22,7 @@ export class UsersService {
   }
 
   async findUserById(id: string) {
-    return this.userRepository.findOneBy({ id });
+    return this.userRepository.findUserWithStats(id);
   }
 
   async userExists(userId: string) {

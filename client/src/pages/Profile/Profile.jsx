@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { User, Mail, AtSign, Calendar, Edit, Check } from "lucide-react";
+import { User as UserIcon, Mail, AtSign, Calendar, Edit, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -20,31 +20,35 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 
-// Mock user data
-const MOCK_USER = {
-    id: "1",
-    firstName: "John",
-    lastName: "Doe",
-    username: "johndoe",
-    email: "john.doe@example.com",
-    createdAt: "2025-06-15T10:30:00Z",
-};
+import { useGetProfileQuery } from "@/api/authApi";
 
 export default function Profile() {
-    const [user, setUser] = useState(MOCK_USER);
+    const { data: profileData, isLoading } = useGetProfileQuery();
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
+    const user = profileData?.user;
+
     const [editForm, setEditForm] = useState({
-        firstName: user.firstName,
-        lastName: user.lastName,
-        username: user.username,
-        email: user.email,
+        firstName: "",
+        lastName: "",
+        username: "",
+        email: "",
     });
 
+    const handleEditClick = () => {
+        if (user) {
+            setEditForm({
+                firstName: user.firstName,
+                lastName: user.lastName,
+                username: user.username,
+                email: user.email,
+            });
+            setIsEditDialogOpen(true);
+        }
+    };
+
     const handleEditProfile = () => {
-        setUser({
-            ...user,
-            ...editForm,
-        });
+        // Update functionality not yet implemented in backend
         setIsEditDialogOpen(false);
     };
 
@@ -61,6 +65,7 @@ export default function Profile() {
     };
 
     const getMembershipDuration = () => {
+        if (!user || !user.createdAt) return "N/A";
         const created = new Date(user.createdAt);
         const now = new Date();
         const months = Math.floor((now - created) / (1000 * 60 * 60 * 24 * 30));
@@ -70,6 +75,22 @@ export default function Profile() {
         const years = Math.floor(months / 12);
         return years === 1 ? "1 year" : `${years} years`;
     };
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6 flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+            </div>
+        );
+    }
+
+    if (!user) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6 flex items-center justify-center">
+                <p className="text-red-500">Failed to load profile data</p>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
@@ -102,12 +123,7 @@ export default function Profile() {
                                     <Button
                                         variant="ghost"
                                         className="text-white hover:bg-white/20"
-                                        onClick={() => setEditForm({
-                                            firstName: user.firstName,
-                                            lastName: user.lastName,
-                                            username: user.username,
-                                            email: user.email,
-                                        })}
+                                        onClick={handleEditClick}
                                     >
                                         <Edit className="h-4 w-4 mr-2" />
                                         Edit Profile
@@ -208,7 +224,7 @@ export default function Profile() {
                             {/* Account Age */}
                             <div className="flex items-start gap-3">
                                 <div className="p-2 rounded-lg bg-orange-50">
-                                    <User className="h-5 w-5 text-orange-600" />
+                                    <UserIcon className="h-5 w-5 text-orange-600" />
                                 </div>
                                 <div>
                                     <p className="text-sm text-gray-600 mb-1">Account Age</p>
@@ -224,7 +240,7 @@ export default function Profile() {
                     <Card className="border-0 shadow-md">
                         <CardContent className="pt-6">
                             <div className="text-center">
-                                <p className="text-3xl font-bold text-indigo-600 mb-1">5</p>
+                                <p className="text-3xl font-bold text-indigo-600 mb-1">{user.accountsCount || 0}</p>
                                 <p className="text-sm text-gray-600">Active Accounts</p>
                             </div>
                         </CardContent>
@@ -232,7 +248,7 @@ export default function Profile() {
                     <Card className="border-0 shadow-md">
                         <CardContent className="pt-6">
                             <div className="text-center">
-                                <p className="text-3xl font-bold text-purple-600 mb-1">47</p>
+                                <p className="text-3xl font-bold text-purple-600 mb-1">{user.transactionsCount || 0}</p>
                                 <p className="text-sm text-gray-600">Transactions</p>
                             </div>
                         </CardContent>
@@ -240,7 +256,7 @@ export default function Profile() {
                     <Card className="border-0 shadow-md">
                         <CardContent className="pt-6">
                             <div className="text-center">
-                                <p className="text-3xl font-bold text-pink-600 mb-1">1</p>
+                                <p className="text-3xl font-bold text-pink-600 mb-1">{user.budgetCount || 0}</p>
                                 <p className="text-sm text-gray-600">Active Budgets</p>
                             </div>
                         </CardContent>

@@ -33,4 +33,20 @@ export class UserRepository {
   public save(user: User) {
     return this.repository.save(user);
   }
+
+  public async findUserWithStats(id: string) {
+    const user = await this.repository
+      .createQueryBuilder('user')
+      .loadRelationCountAndMap('user.accountsCount', 'user.accounts')
+      .loadRelationCountAndMap('user.transactionsCount', 'user.transactions')
+      .leftJoinAndSelect('user.budget', 'budget')
+      .where('user.id = :id', { id })
+      .getOne();
+
+    if (user) {
+      user.budgetCount = user.budget ? 1 : 0;
+      // Optionally remove result from returned object if not needed, but keeping it is fine.
+    }
+    return user;
+  }
 }
