@@ -1,13 +1,15 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import { Button } from "@/components/ui/button";
+import { selectIsAuthenticated, logout } from "@/store/authSlice";
 
 export default function Header() {
     const navigate = useNavigate();
-    // TODO: Replace with actual auth state
-    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+    const dispatch = useDispatch();
+    const isLoggedIn = useSelector(selectIsAuthenticated);
 
     const handleLogout = () => {
-        localStorage.removeItem("isLoggedIn");
+        dispatch(logout());
         navigate("/login");
     };
 

@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useDispatch } from "react-redux";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +22,8 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
+import { useLoginMutation } from "@/api/authApi";
+import { setCredentials } from "@/store/authSlice";
 
 const formSchema = z.object({
     email: z.string().email({
@@ -33,6 +35,10 @@ const formSchema = z.object({
 });
 
 export default function Login() {
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const [login, { isLoading, error }] = useLoginMutation();
+
     const form = useForm({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -41,9 +47,14 @@ export default function Login() {
         },
     });
 
-    function onSubmit(values) {
-        // TODO: Implement login logic
-        console.log(values);
+    async function onSubmit(values) {
+        try {
+            const result = await login(values).unwrap();
+            dispatch(setCredentials({ token: result.token }));
+            navigate("/dashboard");
+        } catch (err) {
+            console.error("Login failed:", err);
+        }
     }
 
     return (
@@ -58,6 +69,11 @@ export default function Login() {
                 <CardContent>
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                            {error && (
+                                <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md">
+                                    {error.data?.message || "Login failed. Please try again."}
+                                </div>
+                            )}
                             <FormField
                                 control={form.control}
                                 name="email"
@@ -84,8 +100,8 @@ export default function Login() {
                                     </FormItem>
                                 )}
                             />
-                            <Button type="submit" className="w-full">
-                                Login
+                            <Button type="submit" className="w-full" disabled={isLoading}>
+                                {isLoading ? "Logging in..." : "Login"}
                             </Button>
                         </form>
                     </Form>
