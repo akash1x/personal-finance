@@ -7,6 +7,7 @@ import {
     HandCoins,
     DollarSign,
     Plus,
+    Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,49 +25,10 @@ import { Label } from "@/components/ui/label";
 import {
     Card,
     CardContent,
-    CardDescription,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-
-// Mock data for accounts
-const MOCK_ACCOUNTS = [
-    {
-        id: "1",
-        name: "Main Checking",
-        type: "bank",
-        balance: 5420.5,
-        currency: "USD",
-    },
-    {
-        id: "2",
-        name: "Savings Account",
-        type: "bank",
-        balance: 12500.0,
-        currency: "USD",
-    },
-    {
-        id: "3",
-        name: "Investment Portfolio",
-        type: "investment",
-        balance: 45300.75,
-        currency: "USD",
-    },
-    {
-        id: "4",
-        name: "Cash Wallet",
-        type: "cash",
-        balance: 250.0,
-        currency: "USD",
-    },
-    {
-        id: "5",
-        name: "Credit Card",
-        type: "credit_card",
-        balance: -1200.5,
-        currency: "USD",
-    },
-];
+import { useGetAccountsQuery, useCreateAccountMutation } from "@/api/accountApi";
 
 const accountTypeConfig = {
     bank: {
@@ -123,7 +85,11 @@ const currencySymbols = {
 };
 
 export default function Accounts() {
-    const [accounts, setAccounts] = useState(MOCK_ACCOUNTS);
+    const { data, isLoading, error } = useGetAccountsQuery();
+    const accounts = data?.accounts || [];
+    const totalBalance = data?.totalBalance || 0;
+    const [createAccount, { isLoading: isCreating }] = useCreateAccountMutation();
+
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [newAccount, setNewAccount] = useState({
         name: "",
@@ -132,22 +98,24 @@ export default function Accounts() {
         currency: "USD",
     });
 
-    const handleAddAccount = () => {
+    const handleAddAccount = async () => {
         if (newAccount.name && newAccount.balance) {
-            const account = {
-                id: Date.now().toString(),
-                name: newAccount.name,
-                type: newAccount.type,
-                balance: parseFloat(newAccount.balance),
-                currency: newAccount.currency,
-            };
-            setAccounts([...accounts, account]);
-            setNewAccount({ name: "", type: "bank", balance: "", currency: "USD" });
-            setIsDialogOpen(false);
+            try {
+                await createAccount({
+                    name: newAccount.name,
+                    type: newAccount.type,
+                    balance: parseFloat(newAccount.balance),
+                    currency: newAccount.currency,
+                }).unwrap();
+                setNewAccount({ name: "", type: "bank", balance: "", currency: "USD" });
+                setIsDialogOpen(false);
+            } catch (err) {
+                console.error("Failed to create account:", err);
+            }
         }
     };
 
-    const formatBalance = (balance, currency) => {
+    const formatBalance = (balance, currency = "USD") => {
         const symbol = currencySymbols[currency] || currency;
         const absBalance = Math.abs(balance);
         const formatted = absBalance.toLocaleString("en-US", {
@@ -157,7 +125,27 @@ export default function Accounts() {
         return balance < 0 ? `-${symbol}${formatted}` : `${symbol}${formatted}`;
     };
 
-    const totalBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0);
+    // totalBalance is already provided by the API
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6 flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+                <div className="container mx-auto max-w-7xl">
+                    <div className="p-4 bg-red-50 text-red-700 rounded-lg">
+                        Failed to load accounts. Please try again.
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
@@ -190,7 +178,7 @@ export default function Accounts() {
                 {/* Accounts Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {accounts.map((account) => {
-                        const config = accountTypeConfig[account.type];
+                        const config = accountTypeConfig[account.type] || accountTypeConfig.other;
                         const Icon = config.icon;
 
                         return (
@@ -228,8 +216,8 @@ export default function Accounts() {
                                             <p className="text-sm text-gray-600 mb-1">Balance</p>
                                             <p
                                                 className={`text-2xl font-bold ${account.balance < 0
-                                                        ? "text-red-600"
-                                                        : "text-gray-900"
+                                                    ? "text-red-600"
+                                                    : "text-gray-900"
                                                     }`}
                                             >
                                                 {formatBalance(account.balance, account.currency)}
@@ -335,7 +323,9 @@ export default function Accounts() {
                                 >
                                     Cancel
                                 </Button>
-                                <Button onClick={handleAddAccount}>Add Account</Button>
+                                <Button onClick={handleAddAccount} disabled={isCreating}>
+                                    {isCreating ? "Adding..." : "Add Account"}
+                                </Button>
                             </DialogFooter>
                         </DialogContent>
                     </Dialog>
