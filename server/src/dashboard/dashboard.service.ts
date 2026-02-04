@@ -1,25 +1,29 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { AccountRepository } from 'src/respositories/account.repository';
 import { BudgetRepository } from 'src/respositories/budget.respository';
-import { CreateBudgetDto } from './dto/request.dto';
-import { Month } from 'src/utils/enums';
-import { UsersService } from 'src/users/users.service';
 import { TransactionRepository } from 'src/respositories/transaction.repository';
+import { UsersService } from 'src/users/users.service';
+import { GetDashboardSummaryDto } from './dto/query.dto';
 
 @Injectable()
-export class BudgetService {
+export class DashboardService {
   constructor(
-    @Inject(BudgetRepository) private budgetRepository: BudgetRepository,
-    @Inject(UsersService) private usersService: UsersService,
     @Inject(TransactionRepository)
     private transactionRepository: TransactionRepository,
+    @Inject(BudgetRepository)
+    private budgetRepository: BudgetRepository,
+    @Inject(UsersService)
+    private usersService: UsersService,
+    @Inject(AccountRepository)
+    private accountRepository: AccountRepository,
   ) {}
-  async create(userId: string, createBudgetDto: CreateBudgetDto) {
+  async getDashboardSummary(userId: string, query: GetDashboardSummaryDto) {
     await this.usersService.userExists(userId);
-    return this.budgetRepository.saveBudget(userId, createBudgetDto);
-  }
-
-  async getCurrentBudget(userId: string, month: Month, year: number) {
-    await this.usersService.userExists(userId);
+    const { month, year } = query;
+    const accounts = await this.accountRepository.getAccounts(userId);
+    if (accounts.length === 0) {
+      throw new HttpException('Accounts not found', HttpStatus.NOT_FOUND);
+    }
     const budget = await this.budgetRepository.findCurrentBudget(
       userId,
       month,
@@ -28,28 +32,32 @@ export class BudgetService {
     if (!budget) {
       throw new HttpException('Budget not found', HttpStatus.NOT_FOUND);
     }
+
     const incomeTotal: number =
       await this.transactionRepository.getIncomeTotalByMonthAndYear(
         userId,
         month,
         year,
       );
-    const expenseTotal: number =
+    const expenseTotal =
       await this.transactionRepository.getExpenseTotalByMonthAndYear(
         userId,
         month,
         year,
       );
 
-    const remainingBudget = budget.amount + incomeTotal - expenseTotal;
+    const totalBalance = accounts.reduce(
+      (acc, account) => acc + account.balance,
+      0,
+    );
 
-    const totalExpenseByCategory =
+    const getExpenseByCategory =
       await this.transactionRepository.getTotalExpenseByCategory(
         userId,
         month,
         year,
       );
-    const expenseByCategory = totalExpenseByCategory.map((expense) => {
+    const expensePercentageByCategory = getExpenseByCategory.map((expense) => {
       const percentageOfBudget = (expense.total / budget.amount) * 100;
       return {
         category: expense.category,
@@ -57,10 +65,13 @@ export class BudgetService {
         percentageOfBudget,
       };
     });
+
     return {
-      budgetAmount: budget.amount,
-      remainingBudget,
-      expenseByCategory,
+      totalBalance,
+      monthlyIncome: budget.amount + incomeTotal,
+      monthlyExpense: expenseTotal,
+      netSavings: budget.amount + incomeTotal - expenseTotal,
+      expensePercentageByCategory,
     };
   }
 }

@@ -18,7 +18,7 @@ export class AccountRepository {
     });
   }
 
-  async getAccount(userId: string) {
+  async getAccounts(userId: string): Promise<Account[]> {
     return this.repository.find({ where: { user: { id: userId } } });
   }
 }

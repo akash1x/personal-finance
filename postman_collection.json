@@ -56,7 +56,7 @@
               "script": {
                 "exec": [
                   "var jsonData = pm.response.json();",
-                  "pm.collectionVariables.set(\"access_token\", jsonData.access_token);"
+                  "pm.collectionVariables.set(\"access_token\", jsonData.token);"
                 ],
                 "type": "text/javascript"
               }
@@ -138,7 +138,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Monthly Budget\",\n  \"amount\": 1000,\n  \"currency\": \"usd\",\n  \"month\": \"january\",\n  \"year\": 2024,\n  \"userId\": \"uuid-goes-here\"\n}"
+              "raw": "{\n  \"name\": \"Monthly Budget\",\n  \"amount\": 1000,\n  \"currency\": \"usd\",\n  \"month\": \"january\",\n  \"year\": 2024\n}"
             },
             "url": {
               "raw": "http://localhost:3000/budget",
@@ -166,11 +166,21 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/budget",
+              "raw": "http://localhost:3000/budget?month=january&year=2024",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["budget"]
+              "path": ["budget"],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "january"
+                },
+                {
+                  "key": "year",
+                  "value": "2024"
+                }
+              ]
             }
           },
           "response": []
@@ -203,7 +213,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Main Bank Account\",\n  \"type\": \"bank\",\n  \"balance\": 5000,\n  \"userId\": \"uuid-goes-here\"\n}"
+              "raw": "{\n  \"name\": \"Main Bank Account\",\n  \"type\": \"bank\",\n  \"balance\": 5000\n}"
             },
             "url": {
               "raw": "http://localhost:3000/account",
@@ -296,11 +306,52 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/transaction",
+              "raw": "http://localhost:3000/transaction/user?month=january&year=2024",
               "protocol": "http",
               "host": ["localhost"],
               "port": "3000",
-              "path": ["transaction"]
+              "path": ["transaction", "user"],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "january"
+                },
+                {
+                  "key": "year",
+                  "value": "2024"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Transactions by Account",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/transaction/account/:accountId",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["transaction", "account", ":accountId"],
+              "variable": [
+                {
+                  "key": "accountId",
+                  "value": "uuid-here"
+                }
+              ]
             }
           },
           "response": []

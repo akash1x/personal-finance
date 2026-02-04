@@ -15,12 +15,16 @@ export class AccountService {
     return this.accountRepository.createAccount(userId, createAccountDto);
   }
 
-  async getAccount(userId: string) {
+  async getAccounts(userId: string) {
     await this.usersService.userExists(userId);
-    const account = await this.accountRepository.getAccount(userId);
-    if (!account) {
-      throw new HttpException('Account not found', HttpStatus.NOT_FOUND);
+    const accounts = await this.accountRepository.getAccounts(userId);
+    if (accounts.length === 0) {
+      throw new HttpException('Accounts not found', HttpStatus.NOT_FOUND);
     }
-    return account;
+    const totalBalance = accounts.reduce(
+      (acc, account) => acc + account.balance,
+      0,
+    );
+    return { accounts, totalBalance };
   }
 }

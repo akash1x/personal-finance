@@ -14,7 +14,7 @@ export class AccountController {
   }
 
   @Get()
-  async getAccount(@Req() req) {
-    return this.accountService.getAccount(req.user.sub);
+  async getAccounts(@Req() req) {
+    return this.accountService.getAccounts(req.user.sub);
   }
 }
