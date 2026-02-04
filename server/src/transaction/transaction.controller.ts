@@ -37,7 +37,7 @@ export class TransactionController {
     return this.transactionService.getAllTransactionsByUserId(
       req.user.sub,
       query.month,
-      query.year,
+      parseInt(query.year as any),
     );
   }
   @Get('account/:accountId')

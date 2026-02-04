@@ -38,6 +38,9 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
+import { useGetTransactionsQuery, useCreateTransactionMutation } from "@/api/transactionApi";
+import { useGetAccountsQuery } from "@/api/accountApi";
 
 // Category icons
 const categoryIcons = {
@@ -51,100 +54,12 @@ const categoryIcons = {
     other: DollarSign,
 };
 
-// Mock transactions data
-const MOCK_TRANSACTIONS = [
-    {
-        id: "1",
-        description: "Salary - January",
-        amount: 5000,
-        currency: "USD",
-        type: "income",
-        status: "completed",
-        category: "other",
-        date: "2026-01-25",
-        isRecurring: true,
-        recurrencePattern: "monthly",
-        account: "Main Checking",
-    },
-    {
-        id: "2",
-        description: "Grocery Store",
-        amount: 85.5,
-        currency: "USD",
-        type: "expense",
-        status: "completed",
-        category: "food",
-        date: "2026-01-24",
-        isRecurring: false,
-        recurrencePattern: "daily",
-        account: "Credit Card",
-    },
-    {
-        id: "3",
-        description: "Gas Station",
-        amount: 45,
-        currency: "USD",
-        type: "expense",
-        status: "completed",
-        category: "transportation",
-        date: "2026-01-23",
-        isRecurring: false,
-        recurrencePattern: "daily",
-        account: "Debit Card",
-    },
-    {
-        id: "4",
-        description: "Rent Payment",
-        amount: 1200,
-        currency: "USD",
-        type: "expense",
-        status: "pending",
-        category: "housing",
-        date: "2026-01-30",
-        isRecurring: true,
-        recurrencePattern: "monthly",
-        account: "Main Checking",
-    },
-    {
-        id: "5",
-        description: "Electric Bill",
-        amount: 75,
-        currency: "USD",
-        type: "expense",
-        status: "completed",
-        category: "utilities",
-        date: "2026-01-20",
-        isRecurring: true,
-        recurrencePattern: "monthly",
-        account: "Main Checking",
-    },
-    {
-        id: "6",
-        description: "Transfer to Savings",
-        amount: 500,
-        currency: "USD",
-        type: "transfer",
-        status: "completed",
-        category: "other",
-        date: "2026-01-15",
-        isRecurring: false,
-        recurrencePattern: "daily",
-        account: "Main Checking",
-    },
-    {
-        id: "7",
-        description: "Netflix Subscription",
-        amount: 15.99,
-        currency: "USD",
-        type: "expense",
-        status: "completed",
-        category: "entertainment",
-        date: "2026-01-10",
-        isRecurring: true,
-        recurrencePattern: "monthly",
-        account: "Credit Card",
-    },
+const monthNames = [
+    "january", "february", "march", "april", "may", "june",
+    "july", "august", "september", "october", "november", "december"
 ];
+
+// Mock transactions removed
 
 const currencySymbols = {
     USD: "$", EUR: "€", GBP: "£", JPY: "¥", CNY: "¥", INR: "₹",
@@ -157,7 +72,6 @@ const categoryLabels = {
 };
 
 export default function Transactions() {
-    const [transactions, setTransactions] = useState(MOCK_TRANSACTIONS);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [showFilters, setShowFilters] = useState(false);
     const [filterType, setFilterType] = useState("all");
@@ -168,6 +82,37 @@ export default function Transactions() {
     const [filterRecurring, setFilterRecurring] = useState("all");
     const [dateFrom, setDateFrom] = useState("");
     const [dateTo, setDateTo] = useState("");
+
+    const currentDate = new Date();
+    const queryMonth = filterMonth !== "all" ? monthNames[parseInt(filterMonth) - 1] : monthNames[currentDate.getMonth()];
+    const queryYear = filterYear !== "all" ? parseInt(filterYear) : currentDate.getFullYear();
+
+    const { data: transactionData, isLoading } = useGetTransactionsQuery({
+        month: queryMonth,
+        year: queryYear
+    });
+
+    const { data: accountsData } = useGetAccountsQuery();
+    const accounts = accountsData?.accounts || [];
+
+    // Helper to get account name
+    const getAccountName = (txn) => {
+        if (txn.account && typeof txn.account === 'object' && txn.account.name) return txn.account.name;
+        if (txn.account && typeof txn.account === 'string') return txn.account; // fallback for strings
+        if (txn.accountId && accounts.length > 0) {
+            const acc = accounts.find(a => a.id === txn.accountId);
+            return acc ? acc.name : "Unknown Account";
+        }
+        return "Unknown Account";
+    };
+
+    const [createTransaction, { isLoading: isCreating }] = useCreateTransactionMutation();
+
+    const transactions = transactionData?.transactions || [];
+    const totalIncome = transactionData?.totalIncome || 0;
+    const totalExpense = transactionData?.totalExpense || 0;
+    const netBalance = transactionData?.netBalance || 0;
+
     const [newTransaction, setNewTransaction] = useState({
         description: "",
         amount: "",
@@ -177,7 +122,7 @@ export default function Transactions() {
         date: new Date().toISOString().split("T")[0],
         isRecurring: false,
         recurrencePattern: "monthly",
-        account: "Main Checking",
+        accountId: "",
     });
 
     const formatAmount = (amount, currency) => {
@@ -225,27 +170,30 @@ export default function Transactions() {
         return badges[status] || badges.completed;
     };
 
-    const handleAddTransaction = () => {
-        if (newTransaction.description && newTransaction.amount) {
-            const transaction = {
-                id: Date.now().toString(),
-                ...newTransaction,
-                amount: parseFloat(newTransaction.amount),
-                currency: "USD",
-            };
-            setTransactions([transaction, ...transactions]);
-            setNewTransaction({
-                description: "",
-                amount: "",
-                type: "expense",
-                status: "completed",
-                category: "food",
-                date: new Date().toISOString().split("T")[0],
-                isRecurring: false,
-                recurrencePattern: "monthly",
-                account: "Main Checking",
-            });
-            setIsDialogOpen(false);
+    const handleAddTransaction = async () => {
+        if (newTransaction.description && newTransaction.amount && newTransaction.accountId) {
+            try {
+                await createTransaction({
+                    ...newTransaction,
+                    amount: parseFloat(newTransaction.amount),
+                    currency: "usd", // Default currency
+                }).unwrap();
+
+                setNewTransaction({
+                    description: "",
+                    amount: "",
+                    type: "expense",
+                    status: "completed",
+                    category: "food",
+                    date: new Date().toISOString().split("T")[0],
+                    isRecurring: false,
+                    recurrencePattern: "monthly",
+                    accountId: "",
+                });
+                setIsDialogOpen(false);
+            } catch (err) {
+                console.error("Failed to create transaction:", err);
+            }
         }
     };
 
@@ -276,14 +224,16 @@ export default function Transactions() {
             matchesYear && matchesDateFrom && matchesDateTo && matchesRecurring;
     });
 
-    // Calculate totals
-    const totalIncome = transactions
-        .filter((t) => t.type === "income" && t.status === "completed")
-        .reduce((sum, t) => sum + t.amount, 0);
-    const totalExpense = transactions
-        .filter((t) => t.type === "expense" && t.status === "completed")
-        .reduce((sum, t) => sum + t.amount, 0);
-    const netBalance = totalIncome - totalExpense;
+    // Totals are calculated by API
+    // const totalIncome = ... (already from API)
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6 flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
@@ -340,6 +290,20 @@ export default function Transactions() {
                                             <option value="expense">Expense</option>
                                             <option value="transfer">Transfer</option>
                                         </select>
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="account">Account</Label>
+                                            <select
+                                                id="account"
+                                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                                value={newTransaction.accountId}
+                                                onChange={(e) => setNewTransaction({ ...newTransaction, accountId: e.target.value })}
+                                            >
+                                                <option value="">Select Account</option>
+                                                {accounts.map((acc) => (
+                                                    <option key={acc.id} value={acc.id}>{acc.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
@@ -392,7 +356,9 @@ export default function Transactions() {
                             </div>
                             <DialogFooter>
                                 <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                                <Button onClick={handleAddTransaction}>Add Transaction</Button>
+                                <Button onClick={handleAddTransaction} disabled={isCreating}>
+                                    {isCreating ? "Adding..." : "Add Transaction"}
+                                </Button>
                             </DialogFooter>
                         </DialogContent>
                     </Dialog>
@@ -602,9 +568,9 @@ export default function Transactions() {
                                                         <span>{categoryLabels[txn.category]}</span>
                                                     </div>
                                                     <span>•</span>
-                                                    <span>{new Date(txn.date).toLocaleDateString()}</span>
+                                                    <span>{txn.date ? new Date(txn.date).toLocaleDateString() : 'No date'}</span>
                                                     <span>•</span>
-                                                    <span>{txn.account}</span>
+                                                    <span>{getAccountName(txn)}</span>
                                                 </div>
                                             </div>
                                         </div>
