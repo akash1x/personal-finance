@@ -1,0 +1,57 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: personal-finance-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: personal-finance
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - finance-network
+    restart: always
+
+  server:
+    build: ./server
+    image: personal-finance-server
+    container_name: personal-finance-server
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432 # should give internal port as they are inside same network
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: personal-finance
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres
+    networks:
+      - finance-network
+    restart: always
+
+  client:
+    build:
+      context: ./client
+      args:
+        VITE_API_BASE_URL: http://localhost:5000
+    image: personal-finance-client
+    container_name: personal-finance-client
+    ports:
+      - "3000:3000"
+    depends_on:
+      - server
+    networks:
+      - finance-network
+    restart: always
+
+volumes:
+  postgres-data:
+
+networks:
+  finance-network:
+    driver: bridge
