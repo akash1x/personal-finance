@@ -135,17 +135,7 @@ export default function Accounts() {
         );
     }
 
-    if (error) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
-                <div className="container mx-auto max-w-7xl">
-                    <div className="p-4 bg-red-50 text-red-700 rounded-lg">
-                        Failed to load accounts. Please try again.
-                    </div>
-                </div>
-            </div>
-        );
-    }
+
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
@@ -157,6 +147,12 @@ export default function Accounts() {
                         Manage your financial accounts and track your wealth
                     </p>
                 </div>
+
+                {error && (
+                    <div className="mb-8 p-4 bg-red-50 text-red-700 rounded-lg border border-red-200">
+                        Failed to load accounts. Please try again. You can still add a new account.
+                    </div>
+                )}
 
                 {/* Total Balance Card */}
                 <Card className="mb-8 border-0 shadow-lg bg-gradient-to-br from-indigo-500 to-purple-600">
