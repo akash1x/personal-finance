@@ -4,6 +4,8 @@ import { CreateTransactionDto } from './dto/request.dto';
 import { UsersService } from 'src/users/users.service';
 import { BudgetRepository } from 'src/respositories/budget.respository';
 import { Month } from 'src/utils/enums';
+import { GetTransactionResponseDto } from './dto/response.dto';
+import { Transaction } from 'src/entities/transaction.entity';
 
 @Injectable()
 export class TransactionService {
@@ -22,7 +24,11 @@ export class TransactionService {
     return this.transactionRepository.createOne(userId, createTransactionDto);
   }
 
-  async getAllTransactionsByUserId(userId: string, month: Month, year: number) {
+  async getAllTransactionsByUserId(
+    userId: string,
+    month: Month,
+    year: number,
+  ): Promise<GetTransactionResponseDto> {
     await this.usersService.userExists(userId);
     const transactions =
       await this.transactionRepository.findAllByUserId(userId);
@@ -55,7 +61,10 @@ export class TransactionService {
     };
   }
 
-  async getAllTransactionsByAccountId(userId: string, accountId: string) {
+  async getAllTransactionsByAccountId(
+    userId: string,
+    accountId: string,
+  ): Promise<Transaction[]> {
     await this.usersService.userExists(userId);
     const transactions =
       await this.transactionRepository.findAllByAccountId(accountId);

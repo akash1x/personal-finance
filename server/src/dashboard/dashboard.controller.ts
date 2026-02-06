@@ -1,6 +1,6 @@
 import { Controller, Get, Inject, Query, Req } from '@nestjs/common';
 import { DashboardService } from './dashboard.service';
-import { GetDashboardSummaryDto } from './dto/query.dto';
+import { GetDashboardSummaryQueryDto } from './dto/request.dto';
 
 @Controller('dashboard')
 export class DashboardController {
@@ -12,7 +12,7 @@ export class DashboardController {
   @Get()
   async getDashboardSummary(
     @Req() req,
-    @Query() query: GetDashboardSummaryDto,
+    @Query() query: GetDashboardSummaryQueryDto,
   ) {
     return this.dashboardService.getDashboardSummary(req.user.sub, query);
   }

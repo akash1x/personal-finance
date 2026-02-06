@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { AccountRepository } from 'src/respositories/account.repository';
 import { CreateAccountDto } from './dto/request.dto';
 import { UsersService } from 'src/users/users.service';
+import { AccountsResponseDto } from './dto/response.dto';
 
 @Injectable()
 export class AccountService {
@@ -15,7 +16,7 @@ export class AccountService {
     return this.accountRepository.createAccount(userId, createAccountDto);
   }
 
-  async getAccounts(userId: string) {
+  async getAccounts(userId: string): Promise<AccountsResponseDto> {
     await this.usersService.userExists(userId);
     const accounts = await this.accountRepository.getAccounts(userId);
     if (accounts.length === 0) {

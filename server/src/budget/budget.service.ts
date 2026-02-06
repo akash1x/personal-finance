@@ -4,6 +4,8 @@ import { CreateBudgetDto } from './dto/request.dto';
 import { Month } from 'src/utils/enums';
 import { UsersService } from 'src/users/users.service';
 import { TransactionRepository } from 'src/respositories/transaction.repository';
+import { ExpenseByCategory } from 'src/utils/types';
+import { BudgetStatusResponseDto } from './dto/response.dto';
 
 @Injectable()
 export class BudgetService {
@@ -18,7 +20,11 @@ export class BudgetService {
     return this.budgetRepository.saveBudget(userId, createBudgetDto);
   }
 
-  async getCurrentBudgetStatus(userId: string, month: Month, year: number) {
+  async getCurrentBudgetStatus(
+    userId: string,
+    month: Month,
+    year: number,
+  ): Promise<BudgetStatusResponseDto> {
     await this.usersService.userExists(userId);
     const budget = await this.budgetRepository.findBudget(userId);
     if (!budget) {
@@ -45,14 +51,16 @@ export class BudgetService {
         month,
         year,
       );
-    const expenseByCategory = totalExpenseByCategory.map((expense) => {
-      const percentageOfBudget = (expense.total / budget.amount) * 100;
-      return {
-        category: expense.category,
-        total: expense.total,
-        percentageOfBudget,
-      };
-    });
+    const expenseByCategory: ExpenseByCategory[] = totalExpenseByCategory.map(
+      (expense) => {
+        const percentageOfBudget = (expense.total / budget.amount) * 100;
+        return {
+          category: expense.category,
+          total: expense.total,
+          percentageOfBudget,
+        };
+      },
+    );
     return {
       budgetAmount: budget.amount,
       remainingBudget,

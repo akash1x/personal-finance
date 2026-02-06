@@ -3,7 +3,8 @@ import { AccountRepository } from 'src/respositories/account.repository';
 import { BudgetRepository } from 'src/respositories/budget.respository';
 import { TransactionRepository } from 'src/respositories/transaction.repository';
 import { UsersService } from 'src/users/users.service';
-import { GetDashboardSummaryDto } from './dto/query.dto';
+import { GetDashboardSummaryQueryDto } from './dto/request.dto';
+import { GetDashboardSummaryResponseDto } from './dto/response.dto';
 
 @Injectable()
 export class DashboardService {
@@ -17,7 +18,10 @@ export class DashboardService {
     @Inject(AccountRepository)
     private accountRepository: AccountRepository,
   ) {}
-  async getDashboardSummary(userId: string, query: GetDashboardSummaryDto) {
+  async getDashboardSummary(
+    userId: string,
+    query: GetDashboardSummaryQueryDto,
+  ): Promise<GetDashboardSummaryResponseDto> {
     await this.usersService.userExists(userId);
     const { month, year } = query;
     const accounts = await this.accountRepository.getAccounts(userId);
