@@ -50,24 +50,23 @@ export class TransactionService {
     if (!budget) {
       throw new HttpException('Budget not found', HttpStatus.NOT_FOUND);
     }
-    const incomeTotal: number =
+    const totalIncome: number =
       await this.transactionRepository.getIncomeTotalByMonthAndYear(
         userId,
         month,
         year,
       );
-    const expenseTotal: number =
+    const totalExpense: number =
       await this.transactionRepository.getExpenseTotalByMonthAndYear(
         userId,
         month,
         year,
       );
-    const totalIncome = budget.amount + incomeTotal;
-    const netBalance = totalIncome - expenseTotal;
+    const netBalance = totalIncome - totalExpense;
     return {
       transactions,
       totalIncome,
-      totalExpense: expenseTotal,
+      totalExpense,
       netBalance,
     };
   }
