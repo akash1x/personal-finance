@@ -133,9 +133,11 @@ export default function Budget() {
                 const payload = {
                     amount: parseFloat(editAmount),
                     currency: "usd",
+                    month: currentMonth,
+                    year: currentYear,
                 };
 
-                if (budget) {
+                if (budget && !error) {
                     await updateBudget(payload).unwrap();
                 } else {
                     await createBudget(payload).unwrap();

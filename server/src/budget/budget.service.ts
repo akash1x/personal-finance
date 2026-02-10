@@ -26,7 +26,7 @@ export class BudgetService {
     year: number,
   ): Promise<BudgetStatusResponseDto> {
     await this.usersService.userExists(userId);
-    const budget = await this.budgetRepository.findBudget(userId);
+    const budget = await this.budgetRepository.findBudget(userId, month, year);
     if (!budget) {
       throw new HttpException('Budget not found', HttpStatus.NOT_FOUND);
     }
@@ -70,6 +70,6 @@ export class BudgetService {
 
   async updateBudget(userId: string, budget: CreateBudgetDto) {
     await this.usersService.userExists(userId);
-    return this.budgetRepository.upsertBudget(userId, budget);
+    return this.budgetRepository.updateBudget(userId, budget);
   }
 }

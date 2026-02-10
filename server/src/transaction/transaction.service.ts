@@ -35,7 +35,7 @@ export class TransactionService {
     if (!transactions) {
       throw new HttpException('Transactions not found', HttpStatus.NOT_FOUND);
     }
-    const budget = await this.budgetRepository.findBudget(userId);
+    const budget = await this.budgetRepository.findBudget(userId, month, year);
     if (!budget) {
       throw new HttpException('Budget not found', HttpStatus.NOT_FOUND);
     }

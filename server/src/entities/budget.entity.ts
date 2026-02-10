@@ -2,8 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
-  OneToOne,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -24,13 +23,21 @@ export class Budget {
   })
   currency: Currency;
 
+  @Column({
+    type: 'enum',
+    enum: Month,
+  })
+  month: Month;
+
+  @Column()
+  year: number;
+
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToOne(() => User, (user) => user.budget)
-  @JoinColumn()
+  @ManyToOne(() => User, (user) => user.budgets)
   user: User;
 }

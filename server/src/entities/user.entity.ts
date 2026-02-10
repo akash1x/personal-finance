@@ -37,8 +37,8 @@ export class User {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToOne(() => Budget, (budget) => budget.user)
-  budget: Budget;
+  @OneToMany(() => Budget, (budget) => budget.user)
+  budgets: Budget[];
 
   @OneToMany(() => Account, (account) => account.user)
   accounts: Account[];

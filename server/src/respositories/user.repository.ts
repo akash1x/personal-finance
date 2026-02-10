@@ -39,12 +39,12 @@ export class UserRepository {
       .createQueryBuilder('user')
       .loadRelationCountAndMap('user.accountsCount', 'user.accounts')
       .loadRelationCountAndMap('user.transactionsCount', 'user.transactions')
-      .leftJoinAndSelect('user.budget', 'budget')
+      .leftJoinAndSelect('user.budgets', 'budgets')
       .where('user.id = :id', { id })
       .getOne();
 
     if (user) {
-      user.budgetCount = user.budget ? 1 : 0;
+      user.budgetCount = user.budgets.length;
       // Optionally remove result from returned object if not needed, but keeping it is fine.
     }
     return user;

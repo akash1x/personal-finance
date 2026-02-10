@@ -138,4 +138,14 @@ export class TransactionRepository {
       where: { account: { id: accountId } },
     });
   }
+
+  async findRecurringTransactions() {
+    return this.repository.find({
+      where: { isRecurring: true },
+    });
+  }
+
+  async saveRecurringTransactions(transactions: Partial<Transaction>[]) {
+    return this.repository.save(transactions);
+  }
 }
