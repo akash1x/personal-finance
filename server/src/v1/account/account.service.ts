@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { AccountRepository } from 'src/respositories/account.repository';
 import { CreateAccountDto } from './dto/request.dto';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from 'src/v1/users/users.service';
 import { AccountsResponseDto } from './dto/response.dto';
 
 @Injectable()

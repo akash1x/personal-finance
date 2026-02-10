@@ -10,8 +10,8 @@ import {
   IsString,
   IsNumber,
   IsEnum,
-  IsDate,
   IsBoolean,
+  IsDateString,
 } from 'class-validator';
 
 export class CreateTransactionDto {
@@ -35,7 +35,7 @@ export class CreateTransactionDto {
   @IsNotEmpty()
   category: Category;
 
-  @IsDate()
+  @IsDateString()
   @IsNotEmpty()
   date: Date;
 

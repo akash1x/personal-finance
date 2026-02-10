@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { BudgetRepository } from 'src/respositories/budget.respository';
 import { CreateBudgetDto } from './dto/request.dto';
 import { Month } from 'src/utils/enums';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from 'src/v1/users/users.service';
 import { TransactionRepository } from 'src/respositories/transaction.repository';
 import { ExpenseByCategory } from 'src/utils/types';
 import { BudgetStatusResponseDto } from './dto/response.dto';

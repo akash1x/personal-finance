@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { TransactionRepository } from '../respositories/transaction.repository';
+import { getNextExecutionDate } from 'src/utils/nextExecutionDate';
 
 @Injectable()
 export class MonitorService {
@@ -8,16 +9,18 @@ export class MonitorService {
     @Inject(TransactionRepository)
     private transactionRepository: TransactionRepository,
   ) {}
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  @Cron(CronExpression.EVERY_10_SECONDS)
   async updateRecurringTransactions() {
     console.log('Updating recurring transactions');
-    const transactions =
-      await this.transactionRepository.findRecurringTransactions();
+    const dueTransactions =
+      await this.transactionRepository.findDueRecurringTransactions();
 
-    const newTransactions = transactions.map((transaction) => ({
+    const newTransactions = dueTransactions.map((transaction) => ({
       ...transaction,
-      id: undefined, // Create new transaction
-      date: new Date(transaction.date.getTime() + 30 * 24 * 60 * 60 * 1000),
+      date: getNextExecutionDate(
+        transaction.recurrencePattern,
+        transaction.date,
+      ),
     }));
 
     if (newTransactions.length > 0) {

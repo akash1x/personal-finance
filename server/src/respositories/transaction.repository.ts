@@ -2,7 +2,7 @@ import { Between, Repository } from 'typeorm';
 import { Transaction } from 'src/entities/transaction.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
-import { CreateTransactionDto } from 'src/transaction/dto/request.dto';
+import { CreateTransactionDto } from 'src/v1/transaction/dto/request.dto';
 import { Month } from 'src/utils/enums';
 
 // Month name to number mapping (0-indexed for JS Date constructor)
@@ -28,10 +28,15 @@ export class TransactionRepository {
     private repository: Repository<Transaction>,
   ) {}
 
-  async createOne(userId: string, createTransactionDto: CreateTransactionDto) {
+  async createOne(
+    userId: string,
+    createTransactionDto: CreateTransactionDto,
+    nextExecutionDate: Date | null,
+  ) {
     const { accountId, ...transactionData } = createTransactionDto;
     return this.repository.save({
       ...transactionData,
+      nextExecutionDate,
       account: { id: accountId },
       user: { id: userId },
     });
@@ -139,10 +144,31 @@ export class TransactionRepository {
     });
   }
 
-  async findRecurringTransactions() {
-    return this.repository.find({
-      where: { isRecurring: true },
-    });
+  async findDueRecurringTransactions() {
+    const now = new Date();
+    return this.repository
+      .createQueryBuilder('transaction')
+      .leftJoin('transaction.user', 'user')
+      .leftJoin('transaction.account', 'account')
+      .select([
+        'transaction.id',
+        'transaction.description',
+        'transaction.amount',
+        'transaction.currency',
+        'transaction.type',
+        'transaction.category',
+        'transaction.date',
+        'transaction.isRecurring',
+        'transaction.recurrencePattern',
+        'transaction.status',
+        'transaction.nextExecutionDate',
+        'user.id',
+        'account.id',
+      ])
+      .where('transaction.isRecurring = :isRecurring', { isRecurring: true })
+      .andWhere('transaction.nextExecutionDate <= :now', { now })
+      .orderBy('transaction.nextExecutionDate', 'ASC')
+      .getMany();
   }
 
   async saveRecurringTransactions(transactions: Partial<Transaction>[]) {

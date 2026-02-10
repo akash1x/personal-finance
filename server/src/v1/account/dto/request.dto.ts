@@ -1,4 +1,4 @@
-import { AccountType } from '../../utils/enums';
+import { AccountType } from '../../../utils/enums';
 import { IsNotEmpty, IsString, IsNumber, IsEnum } from 'class-validator';
 
 export class CreateAccountDto {

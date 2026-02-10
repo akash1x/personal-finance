@@ -2,14 +2,14 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
+import { AuthModule } from './v1/auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { UsersModule } from './users/users.module';
-import { BudgetModule } from './budget/budget.module';
-import { AccountModule } from './account/account.module';
-import { TransactionModule } from './transaction/transaction.module';
-import { DashboardModule } from './dashboard/dashboard.module';
+import { UsersModule } from './v1/users/users.module';
+import { BudgetModule } from './v1/budget/budget.module';
+import { AccountModule } from './v1/account/account.module';
+import { TransactionModule } from './v1/transaction/transaction.module';
+import { DashboardModule } from './v1/dashboard/dashboard.module';
 import { MonitorModule } from './monitor/monitor.module';
 
 @Module({

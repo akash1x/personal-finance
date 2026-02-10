@@ -5,7 +5,7 @@ import { Account } from 'src/entities/account.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Budget } from 'src/entities/budget.entity';
 import { Transaction } from 'src/entities/transaction.entity';
-import { UsersModule } from 'src/users/users.module';
+import { UsersModule } from 'src/v1/users/users.module';
 import { TransactionRepository } from 'src/respositories/transaction.repository';
 import { BudgetRepository } from 'src/respositories/budget.respository';
 import { AccountRepository } from 'src/respositories/account.repository';

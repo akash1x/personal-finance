@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { AccountRepository } from 'src/respositories/account.repository';
 import { BudgetRepository } from 'src/respositories/budget.respository';
 import { TransactionRepository } from 'src/respositories/transaction.repository';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from 'src/v1/users/users.service';
 import { GetDashboardSummaryQueryDto } from './dto/request.dto';
 import { GetDashboardSummaryResponseDto } from './dto/response.dto';
 

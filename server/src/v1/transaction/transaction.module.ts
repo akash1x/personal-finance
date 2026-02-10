@@ -4,7 +4,7 @@ import { TransactionController } from './transaction.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Transaction } from 'src/entities/transaction.entity';
 import { TransactionRepository } from 'src/respositories/transaction.repository';
-import { UsersModule } from 'src/users/users.module';
+import { UsersModule } from 'src/v1/users/users.module';
 import { Budget } from 'src/entities/budget.entity';
 import { BudgetRepository } from 'src/respositories/budget.respository';
 

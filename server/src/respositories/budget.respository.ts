@@ -2,7 +2,7 @@ import { Repository } from 'typeorm';
 import { Budget } from 'src/entities/budget.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateBudgetDto } from 'src/budget/dto/request.dto';
+import { CreateBudgetDto } from 'src/v1/budget/dto/request.dto';
 import { Month } from 'src/utils/enums';
 
 @Injectable()

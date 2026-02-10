@@ -1,12 +1,12 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { TransactionRepository } from 'src/respositories/transaction.repository';
 import { CreateTransactionDto } from './dto/request.dto';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from 'src/v1/users/users.service';
 import { BudgetRepository } from 'src/respositories/budget.respository';
 import { Month } from 'src/utils/enums';
 import { GetTransactionResponseDto } from './dto/response.dto';
 import { Transaction } from 'src/entities/transaction.entity';
-
+import { getNextExecutionDate } from 'src/utils/nextExecutionDate';
 @Injectable()
 export class TransactionService {
   constructor(
@@ -21,7 +21,18 @@ export class TransactionService {
     createTransactionDto: CreateTransactionDto,
   ) {
     await this.usersService.userExists(userId);
-    return this.transactionRepository.createOne(userId, createTransactionDto);
+    let nextExecutionDate: Date | null = null;
+    if (createTransactionDto.isRecurring) {
+      nextExecutionDate = getNextExecutionDate(
+        createTransactionDto.recurrencePattern,
+        createTransactionDto.date,
+      );
+    }
+    return this.transactionRepository.createOne(
+      userId,
+      createTransactionDto,
+      nextExecutionDate,
+    );
   }
 
   async getAllTransactionsByUserId(

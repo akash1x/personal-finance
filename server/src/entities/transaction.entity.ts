@@ -39,6 +39,9 @@ export class Transaction {
   @Column({ type: 'enum', enum: RecurrencePattern })
   recurrencePattern: RecurrencePattern;
 
+  @Column({ type: 'timestamp', nullable: true })
+  nextExecutionDate: Date | null;
+
   @Column({ type: 'enum', enum: TransactionStatus })
   status: TransactionStatus;
 
