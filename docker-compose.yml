@@ -26,6 +26,10 @@ services:
       DB_USER: postgres
       DB_PASSWORD: postgres
       DB_NAME: personal-finance
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      NODE_ENV: production
     ports:
       - "5000:5000"
     depends_on:

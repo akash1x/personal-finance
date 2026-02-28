@@ -79,6 +79,7 @@ DB_USER=postgres
 DB_PASSWORD=postgres
 DB_NAME=personal-finance
 JWT_SECRET=your-secret-key-here
+JWT_REFRESH_SECRET=your-refresh-secret-key-here
 ```
 
 3. **Run backend:**
@@ -191,6 +192,7 @@ npm install
 # DB_PASSWORD=postgres
 # DB_NAME=personal-finance
 # JWT_SECRET=your-secret-key
+# JWT_REFRESH_SECRET=your-refresh-secret-key-here
 
 # Start the development server
 npm run start:dev
@@ -351,6 +353,7 @@ DB_NAME=personal-finance
 
 # JWT Configuration
 JWT_SECRET=your-secret-key-here
+JWT_REFRESH_SECRET=your-refresh-secret-key-here
 
 # AI Receipt Scanning
 GEMINI_API_KEY=your-gemini-api-key

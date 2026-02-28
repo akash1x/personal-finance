@@ -32,6 +32,7 @@ DB_USER=postgres
 DB_PASSWORD=postgres
 DB_NAME=personal-finance
 JWT_SECRET=your-secret-key-here
+JWT_REFRESH_SECRET=your-refresh-secret-key-here
 GEMINI_API_KEY=your-gemini-api-key
 ```
 

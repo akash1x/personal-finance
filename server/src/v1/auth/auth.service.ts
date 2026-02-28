@@ -15,7 +15,6 @@ import {
   AuthProfileResponseDto,
   AuthRegisterResponseDto,
 } from './dto/response.dto';
-import { REFRESH_TOKEN_SECRET } from './constants';
 
 @Injectable()
 export class AuthService {
@@ -71,7 +70,7 @@ export class AuthService {
   ): Promise<{ accessToken: string; refreshToken: string }> {
     try {
       const payload = this.jwtService.verify(currentRefreshToken, {
-        secret: REFRESH_TOKEN_SECRET,
+        secret: process.env.JWT_REFRESH_SECRET,
       });
       const { accessToken, refreshToken } = await this.generateTokens(
         payload.sub,
@@ -90,9 +89,12 @@ export class AuthService {
     const payload = { sub: userId, username };
 
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(payload),
       this.jwtService.signAsync(payload, {
-        secret: REFRESH_TOKEN_SECRET,
+        secret: process.env.JWT_SECRET,
+        expiresIn: '15m',
+      }),
+      this.jwtService.signAsync(payload, {
+        secret: process.env.JWT_REFRESH_SECRET,
         expiresIn: '7d',
       }),
     ]);
