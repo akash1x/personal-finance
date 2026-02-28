@@ -11,6 +11,7 @@ import { AccountModule } from './v1/account/account.module';
 import { TransactionModule } from './v1/transaction/transaction.module';
 import { DashboardModule } from './v1/dashboard/dashboard.module';
 import { MonitorModule } from './monitor/monitor.module';
+import { ReceiptScanModule } from './v1/receipt-scan/receipt-scan.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { MonitorModule } from './monitor/monitor.module';
     TransactionModule,
     DashboardModule,
     MonitorModule,
+    ReceiptScanModule,
   ],
   controllers: [AppController],
   providers: [AppService],

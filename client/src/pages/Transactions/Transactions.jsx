@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import {
     Plus,
     ArrowUpCircle,
@@ -17,6 +17,11 @@ import {
     Repeat,
     ChevronDown,
     ChevronUp,
+    Sparkles,
+    Upload,
+    X,
+    CheckCircle2,
+    AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -41,6 +46,7 @@ import {
 import { Loader2 } from "lucide-react";
 import { useGetTransactionsQuery, useCreateTransactionMutation } from "@/api/transactionApi";
 import { useGetAccountsQuery } from "@/api/accountApi";
+import { useScanReceiptMutation } from "@/api/receiptScanApi";
 
 // Category icons
 const categoryIcons = {
@@ -82,6 +88,49 @@ export default function Transactions() {
     const [filterRecurring, setFilterRecurring] = useState("all");
     const [dateFrom, setDateFrom] = useState("");
     const [dateTo, setDateTo] = useState("");
+
+    // AI Scan state
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [preview, setPreview] = useState(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const fileInputRef = useRef(null);
+    const [scanReceipt, { isLoading: isScanning, error: scanError }] = useScanReceiptMutation();
+
+    const handleFileSelect = useCallback((file) => {
+        if (!file) return;
+        const validTypes = ["image/jpeg", "image/png", "image/webp"];
+        if (!validTypes.includes(file.type)) return;
+        if (file.size > 5 * 1024 * 1024) return;
+        setSelectedFile(file);
+        const reader = new FileReader();
+        reader.onloadend = () => setPreview(reader.result);
+        reader.readAsDataURL(file);
+    }, []);
+
+    const handleScan = async () => {
+        if (!selectedFile) return;
+        try {
+            const result = await scanReceipt(selectedFile).unwrap();
+            setNewTransaction(prev => ({
+                ...prev,
+                description: result.description || prev.description,
+                amount: result.amount?.toString() || prev.amount,
+                category: result.category || prev.category,
+                date: result.date || prev.date,
+                type: "expense",
+            }));
+            // Clear scan UI after successful populate
+            setSelectedFile(null);
+            setPreview(null);
+        } catch (err) {
+            console.error("Scan failed:", err);
+        }
+    };
+
+    const resetScanState = () => {
+        setSelectedFile(null);
+        setPreview(null);
+    };
 
     const currentDate = new Date();
     const queryMonth = filterMonth !== "all" ? monthNames[parseInt(filterMonth) - 1] : monthNames[currentDate.getMonth()];
@@ -244,19 +293,67 @@ export default function Transactions() {
                         <h1 className="text-4xl font-bold text-gray-900 mb-2">Transactions</h1>
                         <p className="text-gray-600">Track your income, expenses, and transfers</p>
                     </div>
-                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) resetScanState(); }}>
                         <DialogTrigger asChild>
                             <Button className="gap-2">
                                 <Plus className="h-4 w-4" />
                                 Add Transaction
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="sm:max-w-[500px]">
+                        <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
                             <DialogHeader>
                                 <DialogTitle>Add New Transaction</DialogTitle>
-                                <DialogDescription>Create a new transaction record</DialogDescription>
+                                <DialogDescription>Create a new transaction record or scan a receipt with AI</DialogDescription>
                             </DialogHeader>
                             <div className="grid gap-4 py-4">
+                                {/* AI Scan Section */}
+                                <div className="border border-dashed border-violet-200 rounded-lg p-3 bg-violet-50/50">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                            <Sparkles className="h-4 w-4 text-violet-600" />
+                                            <span className="text-sm font-medium text-violet-800">Scan Receipt with AI</span>
+                                        </div>
+                                    </div>
+                                    {!preview ? (
+                                        <div
+                                            onDrop={(e) => { e.preventDefault(); setIsDragging(false); handleFileSelect(e.dataTransfer.files[0]); }}
+                                            onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                                            onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
+                                            onClick={() => fileInputRef.current?.click()}
+                                            className={`border border-dashed rounded-lg p-3 text-center cursor-pointer transition-all ${
+                                                isDragging ? "border-violet-500 bg-violet-100" : "border-violet-300 hover:border-violet-400 hover:bg-violet-100/50"
+                                            }`}
+                                        >
+                                            <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => handleFileSelect(e.target.files[0])} className="hidden" />
+                                            <Upload className="h-5 w-5 text-violet-500 mx-auto mb-1" />
+                                            <p className="text-xs text-violet-600">Drop receipt or click to upload</p>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-2">
+                                            <div className="flex items-center gap-3">
+                                                <img src={preview} alt="Receipt" className="h-16 w-16 object-cover rounded-md shadow-sm" />
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-xs text-gray-600 truncate">{selectedFile?.name}</p>
+                                                    <p className="text-xs text-gray-400">{(selectedFile?.size / 1024).toFixed(1)} KB</p>
+                                                </div>
+                                                <button onClick={() => resetScanState()} className="p-1 text-gray-400 hover:text-red-500">
+                                                    <X className="h-4 w-4" />
+                                                </button>
+                                            </div>
+                                            <Button onClick={handleScan} disabled={isScanning} size="sm" className="w-full gap-2 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white">
+                                                {isScanning ? (<><Loader2 className="h-3 w-3 animate-spin" /> Scanning...</>) : (<><Sparkles className="h-3 w-3" /> Scan & Fill Fields</>)}
+                                            </Button>
+                                        </div>
+                                    )}
+                                    {scanError && (
+                                        <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded flex items-start gap-2">
+                                            <AlertCircle className="h-3 w-3 text-red-600 mt-0.5 flex-shrink-0" />
+                                            <p className="text-xs text-red-600">{scanError?.data?.message || "Scan failed. Try a clearer image."}</p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Transaction Form Fields */}
                                 <div className="grid gap-2">
                                     <Label htmlFor="desc">Description</Label>
                                     <Input
