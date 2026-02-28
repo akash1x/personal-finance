@@ -1,7 +1,8 @@
 import { User } from 'src/entities/user.entity';
 
 export class AuthLoginResponseDto {
-  token: string;
+  accessToken: string;
+  refreshToken: string;
 }
 
 export class AuthRegisterResponseDto {

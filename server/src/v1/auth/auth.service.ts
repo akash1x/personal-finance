@@ -1,4 +1,10 @@
-import { Inject, Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  HttpException,
+  HttpStatus,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthLoginDto, AuthRegisterDto } from './dto/request.dto';
 import { UsersService } from 'src/v1/users/users.service';
 import { User } from 'src/entities/user.entity';
@@ -9,6 +15,7 @@ import {
   AuthProfileResponseDto,
   AuthRegisterResponseDto,
 } from './dto/response.dto';
+import { REFRESH_TOKEN_SECRET } from './constants';
 
 @Injectable()
 export class AuthService {
@@ -23,17 +30,17 @@ export class AuthService {
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
-    console.log(user);
     if (!bcrypt.compareSync(password, user.password)) {
       throw new HttpException('Invalid password', HttpStatus.UNAUTHORIZED);
     }
-    const payload = {
-      sub: user.id,
-      username: user.firstName,
-    };
-    const token = await this.jwtService.signAsync(payload);
-    return { token };
+
+    const { accessToken, refreshToken } = await this.generateTokens(
+      user.id,
+      user.firstName,
+    );
+    return { accessToken, refreshToken };
   }
+
   async register(
     registerDto: AuthRegisterDto,
   ): Promise<AuthRegisterResponseDto> {
@@ -57,5 +64,39 @@ export class AuthService {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
     return { user };
+  }
+
+  async refreshTokens(
+    currentRefreshToken: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    try {
+      const payload = this.jwtService.verify(currentRefreshToken, {
+        secret: REFRESH_TOKEN_SECRET,
+      });
+      const { accessToken, refreshToken } = await this.generateTokens(
+        payload.sub,
+        payload.username,
+      );
+      return { accessToken, refreshToken };
+    } catch {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
+  }
+
+  private async generateTokens(
+    userId: string,
+    username: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    const payload = { sub: userId, username };
+
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(payload),
+      this.jwtService.signAsync(payload, {
+        secret: REFRESH_TOKEN_SECRET,
+        expiresIn: '7d',
+      }),
+    ]);
+
+    return { accessToken, refreshToken };
   }
 }

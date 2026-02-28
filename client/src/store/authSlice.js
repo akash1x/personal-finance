@@ -1,20 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-const TOKEN_KEY = 'authToken';
-
-// Initialize state from localStorage
-const getInitialToken = () => {
-    try {
-        return localStorage.getItem(TOKEN_KEY) || null;
-    } catch {
-        return null;
-    }
-};
-
 const initialState = {
-    token: getInitialToken(),
+    token: null,
     user: null,
-    isAuthenticated: !!getInitialToken(),
+    isAuthenticated: false,
 };
 
 const authSlice = createSlice({
@@ -26,11 +15,6 @@ const authSlice = createSlice({
             if (token) {
                 state.token = token;
                 state.isAuthenticated = true;
-                try {
-                    localStorage.setItem(TOKEN_KEY, token);
-                } catch {
-                    // Handle localStorage errors silently
-                }
             }
             if (user) {
                 state.user = user;
@@ -43,11 +27,6 @@ const authSlice = createSlice({
             state.token = null;
             state.user = null;
             state.isAuthenticated = false;
-            try {
-                localStorage.removeItem(TOKEN_KEY);
-            } catch {
-                // Handle localStorage errors silently
-            }
         },
     },
 });

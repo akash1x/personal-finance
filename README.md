@@ -11,14 +11,15 @@ A full-stack personal finance application built with NestJS and React that helps
 - **📅 Recurring Transactions** - Set up automatic recurring payments and income
 - **🎯 Budget Planning** - Create and monitor budgets with real-time tracking
 - **📈 Dashboard Overview** - Visualize your financial health at a glance
-- **🔒 Secure Authentication** - JWT-based authentication with bcrypt password hashing
+- **🔒 Secure Authentication** - JWT-based authentication with refresh tokens and bcrypt password hashing
+- **🧾 AI Receipt Scanning** - Scan receipts using Gemini AI to auto-extract transaction details
 
 ### Technical Features
 
 - **🔄 Real-time Balance Updates** - Atomic transaction handling for accurate balance tracking
 - **📧 Email Notifications** - Get notified about important financial events (mock service)
-- **🤖 AI Receipt Scanning** - Future-ready AI receipt processing (mock service)
 - **⏰ Automated Monitoring** - Background job processing for recurring transactions
+- **🔄 Token Refresh** - Automatic access token refresh via httpOnly cookies
 - **🗄️ PostgreSQL Database** - Robust data persistence with TypeORM
 - **🐳 Docker Support** - Full Docker containerization for easy deployment
 
@@ -239,9 +240,15 @@ The API follows RESTful conventions with the following main endpoints:
 
 ### Authentication
 
-- `POST /api/v1/auth/register` - Register new user
-- `POST /api/v1/auth/login` - Login user
-- `GET /api/v1/auth/profile` - Get user profile (protected)
+- `POST /api/auth/register` - Register new user
+- `POST /api/auth/login` - Login and receive access token + refresh cookie
+- `POST /api/auth/refresh` - Refresh access token using httpOnly cookie
+- `POST /api/auth/logout` - Clear refresh token cookie
+- `GET /api/auth/profile` - Get user profile (protected)
+
+### Receipt Scanning
+
+- `POST /api/receipt-scan/upload` - Upload receipt image for AI scanning (JPEG/PNG/WebP, max 5MB)
 
 ### Accounts
 
@@ -313,10 +320,13 @@ npm run lint           # Lint code
 ## 🔐 Security
 
 - Passwords are hashed using bcrypt before storage
-- JWT tokens for stateless authentication
+- **Dual-token auth**: short-lived access token (15 min) + long-lived refresh token (7 days)
+- **Access token stored in-memory** (Redux) — not in localStorage (XSS-safe)
+- **Refresh token in httpOnly cookie** — not accessible to JavaScript (XSS-safe)
+- Automatic token refresh on 401 responses
 - Protected routes with authentication guards
 - Input validation using class-validator
-- CORS enabled for secure cross-origin requests
+- CORS enabled with credentials for secure cross-origin requests
 
 ## 🎨 UI/UX Features
 
@@ -342,6 +352,9 @@ DB_NAME=personal-finance
 # JWT Configuration
 JWT_SECRET=your-secret-key-here
 
+# AI Receipt Scanning
+GEMINI_API_KEY=your-gemini-api-key
+
 # Server Configuration
 PORT=5000
 ```
@@ -366,7 +379,6 @@ This project is licensed under the UNLICENSED license - see the package.json for
 
 ## 🐛 Known Issues & Future Enhancements
 
-- AI Receipt Scanning is currently a mock service
 - Email notifications are currently a mock service
 - Consider adding data export functionality
 - Consider adding financial reports and insights

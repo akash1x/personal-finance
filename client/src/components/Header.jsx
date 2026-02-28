@@ -2,13 +2,20 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { Button } from "@/components/ui/button";
 import { selectIsAuthenticated, logout } from "@/store/authSlice";
+import { useLogoutMutation } from "@/api/authApi";
 
 export default function Header() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const isLoggedIn = useSelector(selectIsAuthenticated);
+    const [logoutApi] = useLogoutMutation();
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
+        try {
+            await logoutApi().unwrap();
+        } catch {
+            // Clear local state even if server logout fails
+        }
         dispatch(logout());
         navigate("/login");
     };

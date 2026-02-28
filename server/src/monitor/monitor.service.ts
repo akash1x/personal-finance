@@ -9,9 +9,8 @@ export class MonitorService {
     @Inject(TransactionRepository)
     private transactionRepository: TransactionRepository,
   ) {}
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_DAY_AT_1AM)
   async updateRecurringTransactions() {
-    console.log('Updating recurring transactions');
     const dueTransactions =
       await this.transactionRepository.findDueRecurringTransactions();
 

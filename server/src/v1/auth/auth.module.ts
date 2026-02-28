@@ -14,7 +14,7 @@ import { AuthGuard } from './auth.guard';
     JwtModule.register({
       global: true,
       secret: JWT_SECRET,
-      signOptions: { expiresIn: '1d' },
+      signOptions: { expiresIn: '15m' },
     }),
   ],
   controllers: [AuthController],

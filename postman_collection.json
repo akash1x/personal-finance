@@ -11,10 +11,10 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "http://localhost:3000/",
+          "raw": "http://localhost:5000/",
           "protocol": "http",
           "host": ["localhost"],
-          "port": "3000",
+          "port": "5000",
           "path": [""]
         }
       },
@@ -39,11 +39,11 @@
               "raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\",\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"username\": \"johndoe\"\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/auth/register",
+              "raw": "http://localhost:5000/api/auth/register",
               "protocol": "http",
               "host": ["localhost"],
-              "port": "3000",
-              "path": ["auth", "register"]
+              "port": "5000",
+              "path": ["api", "auth", "register"]
             }
           },
           "response": []
@@ -76,12 +76,56 @@
               "raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\"\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/auth/login",
+              "raw": "http://localhost:5000/api/auth/login",
               "protocol": "http",
               "host": ["localhost"],
-              "port": "3000",
-              "path": ["auth", "login"]
+              "port": "5000",
+              "path": ["api", "auth", "login"]
             }
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set(\"access_token\", jsonData.token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/auth/refresh",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "auth", "refresh"]
+            },
+            "description": "Uses the httpOnly refresh_token cookie (set automatically by Login) to obtain a new access token. The cookie is sent automatically by Postman when cookies are enabled."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/auth/logout",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "auth", "logout"]
+            },
+            "description": "Clears the httpOnly refresh_token cookie, effectively logging the user out."
           },
           "response": []
         },
@@ -101,11 +145,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/auth/profile",
+              "raw": "http://localhost:5000/api/auth/profile",
               "protocol": "http",
               "host": ["localhost"],
-              "port": "3000",
-              "path": ["auth", "profile"]
+              "port": "5000",
+              "path": ["api", "auth", "profile"]
             }
           },
           "response": []
@@ -141,11 +185,11 @@
               "raw": "{\n  \"name\": \"Monthly Budget\",\n  \"amount\": 1000,\n  \"currency\": \"usd\",\n  \"month\": \"january\",\n  \"year\": 2024\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/budget",
+              "raw": "http://localhost:5000/api/budget",
               "protocol": "http",
               "host": ["localhost"],
-              "port": "3000",
-              "path": ["budget"]
+              "port": "5000",
+              "path": ["api", "budget"]
             }
           },
           "response": []
@@ -166,11 +210,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/budget?month=january&year=2024",
+              "raw": "http://localhost:5000/api/budget?month=january&year=2024",
               "protocol": "http",
               "host": ["localhost"],
-              "port": "3000",
-              "path": ["budget"],
+              "port": "5000",
+              "path": ["api", "budget"],
               "query": [
                 {
                   "key": "month",
@@ -216,11 +260,11 @@
               "raw": "{\n  \"name\": \"Main Bank Account\",\n  \"type\": \"bank\",\n  \"balance\": 5000\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/account",
+              "raw": "http://localhost:5000/api/account",
               "protocol": "http",
               "host": ["localhost"],
-              "port": "3000",
-              "path": ["account"]
+              "port": "5000",
+              "path": ["api", "account"]
             }
           },
           "response": []
@@ -241,11 +285,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/account",
+              "raw": "http://localhost:5000/api/account",
               "protocol": "http",
               "host": ["localhost"],
-              "port": "3000",
-              "path": ["account"]
+              "port": "5000",
+              "path": ["api", "account"]
             }
           },
           "response": []
@@ -281,11 +325,11 @@
               "raw": "{\n  \"description\": \"Grocery\",\n  \"amount\": 50,\n  \"type\": \"expense\",\n  \"accountId\": \"uuid-of-account\",\n  \"category\": \"food\",\n  \"date\": \"2024-01-30T10:00:00.000Z\",\n  \"currency\": \"usd\",\n  \"status\": \"completed\",\n  \"recurrencePattern\": \"monthly\",\n  \"isRecurring\": false\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/transaction",
+              "raw": "http://localhost:5000/api/transaction",
               "protocol": "http",
               "host": ["localhost"],
-              "port": "3000",
-              "path": ["transaction"]
+              "port": "5000",
+              "path": ["api", "transaction"]
             }
           },
           "response": []
@@ -306,11 +350,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/transaction/user?month=january&year=2024",
+              "raw": "http://localhost:5000/api/transaction/user?month=january&year=2024",
               "protocol": "http",
               "host": ["localhost"],
-              "port": "3000",
-              "path": ["transaction", "user"],
+              "port": "5000",
+              "path": ["api", "transaction", "user"],
               "query": [
                 {
                   "key": "month",
@@ -341,11 +385,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/transaction/account/:accountId",
+              "raw": "http://localhost:5000/api/transaction/account/:accountId",
               "protocol": "http",
               "host": ["localhost"],
-              "port": "3000",
-              "path": ["transaction", "account", ":accountId"],
+              "port": "5000",
+              "path": ["api", "transaction", "account", ":accountId"],
               "variable": [
                 {
                   "key": "accountId",
@@ -353,6 +397,47 @@
                 }
               ]
             }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Receipt Scan",
+      "item": [
+        {
+          "name": "Upload Receipt",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "receipt",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/receipt-scan/upload",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "receipt-scan", "upload"]
+            },
+            "description": "Upload a receipt image (JPEG, PNG, WebP, max 5MB) for AI-powered scanning using Gemini 2.5 Flash."
           },
           "response": []
         }
